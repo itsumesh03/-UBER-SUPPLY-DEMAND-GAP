@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="uber_db.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1592"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="cab_data" custom_title="0" dock_id="1" table="4,8:maincab_data"/><dock_state state="000000ff00000000fd00000001000000020000000000000000fc0100000001fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000011300ffffff000000000000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1*">-- Import the csv file and read it.
+SELECT * FROM cab_data;
+
+
+
+-- Count of Trips by Time Slot
+-- This query tells us how many trips were completed in each time slot (Morning, Evening, etc.)
+SELECT 
+  [Time Slot], 
+  COUNT(*) AS Total_Trips
+FROM 
+  cab_data
+WHERE 
+  Status = 'Trip Completed'
+GROUP BY 
+  [Time Slot]
+ORDER BY 
+  Total_Trips DESC;
+--  Insight: Helps identify which time slot has the highest trip demand.
+
+
+-- Average Trip Duration per Time Slot
+-- This query calculates the average trip duration (in hours) for each time slot
+SELECT 
+  [Time Slot], 
+  ROUND(AVG([Trip Duration]), 2) AS Avg_Duration_Hours
+FROM 
+  cab_data
+WHERE 
+  Status = 'Trip Completed'
+GROUP BY 
+  [Time Slot]
+ORDER BY 
+  Avg_Duration_Hours DESC;
+-- Insight: Reveals which time slots typically have longer or shorter trips on average.
+
+
+
+-- Total Requests Per Day
+-- This shows how many total ride requests were made on each day
+SELECT 
+  [Request Date], 
+  COUNT(*) AS Total_Requests
+FROM 
+  cab_data
+GROUP BY 
+  [Request Date]
+ORDER BY 
+  [Request Date];
+--  Insight: Useful for identifying busy vs slow days in terms of ride demand.
+
+
+
+
+-- Requests by Hour (Peak Hours)
+-- This query counts how many requests were made during each hour of the day (e.g., 9 AM, 6 PM, etc.)
+SELECT 
+  [Request Hour], 
+  COUNT(*) AS Total_Requests
+FROM 
+  cab_data
+GROUP BY 
+  [Request Hour]
+ORDER BY 
+  Total_Requests DESC;
+--  Insight: Helps determine the peak hours during the day when demand is highest.
+
+
+
+
+
+-- Cancellation Rate by Pickup Point
+-- This query calculates the % of requests canceled (i.e., &quot;No Cars Available&quot;) for each pickup location
+SELECT 
+  [Pickup point], 
+  COUNT(*) AS Total_Requests,
+  SUM(CASE WHEN Status = 'No Cars Available' THEN 1 ELSE 0 END) AS Cancelled,
+  ROUND(
+    100.0 * SUM(CASE WHEN Status = 'No Cars Available' THEN 1 ELSE 0 END) / COUNT(*), 
+    2
+  ) AS Cancellation_Rate_Percent
+FROM 
+  cab_data
+GROUP BY 
+  [Pickup point]
+ORDER BY 
+  Cancellation_Rate_Percent DESC;
+-- Insight: Identifies locations where customers are more likely to face booking failures.
+
+
+
+
+
+
+-- Daily Trip Completion Ratio
+-- This query shows the percentage of completed trips out of total requests on each day
+SELECT 
+  [Request Date], 
+  COUNT(*) AS Total_Requests,
+  SUM(CASE WHEN Status = 'Trip Completed' THEN 1 ELSE 0 END) AS Completed_Trips,
+  ROUND(
+    100.0 * SUM(CASE WHEN Status = 'Trip Completed' THEN 1 ELSE 0 END) / COUNT(*), 
+    2
+  ) AS Completion_Rate_Percent
+FROM 
+  cab_data
+GROUP BY 
+  [Request Date]
+ORDER BY 
+  [Request Date];
+--  Insight: Highlights how efficient the service was on each day (good for performance monitoring).
+
+
+
+  
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</sql><current_tab id="0"/></tab_sql></sqlb_project>
